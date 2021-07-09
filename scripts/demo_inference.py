@@ -144,7 +144,14 @@ def check_input():
         raise NotImplementedError
 
 
-def print_finish_info():
+def print_finish_info(runtime_profile=None):
+    if runtime_profile and runtime_profile['dt']:
+        det_time = np.sum(runtime_profile['dt'])
+        pose_time = np.sum(runtime_profile['pt'])
+        post_process_time = np.sum(runtime_profile['pn'])
+        total_time = det_time + pose_time + post_process_time
+        print('det time: {dt:.4f} | pose time: {pt:.4f} | post processing: {pn:.4f} |=> total: {tt:.2f}'.format(
+            dt=det_time, pt=pose_time, pn=post_process_time, tt=total_time))
     print('===========================> Finish Model Running.')
     if (args.save_img or args.save_video) and not args.vis_fast:
         print('===========================> Rendering remaining images in the queue...')
@@ -220,6 +227,7 @@ if __name__ == "__main__":
     if args.flip:
         batchSize = int(batchSize / 2)
     try:
+
         for i in im_names_desc:
             start_time = getTime()
             with torch.no_grad():
@@ -267,7 +275,7 @@ if __name__ == "__main__":
                     'det time: {dt:.4f} | pose time: {pt:.4f} | post processing: {pn:.4f}'.format(
                         dt=np.mean(runtime_profile['dt']), pt=np.mean(runtime_profile['pt']), pn=np.mean(runtime_profile['pn']))
                 )
-        print_finish_info()
+        print_finish_info(runtime_profile)
         while(writer.running()):
             time.sleep(1)
             print('===========================> Rendering remaining ' + str(writer.count()) + ' images in the queue...')
