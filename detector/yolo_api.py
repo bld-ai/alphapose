@@ -28,7 +28,7 @@ if platform.system() != 'Windows':
 
 
 class YOLODetector(BaseDetector):
-    def __init__(self, cfg, opt=None):
+    def __init__(self, cfg, opt=None, model=None):
         super(YOLODetector, self).__init__()
 
         self.detector_cfg = cfg
@@ -39,7 +39,7 @@ class YOLODetector(BaseDetector):
         self.nms_thres = cfg.get('NMS_THRES', 0.6)
         self.confidence = 0.3 if (False if not hasattr(opt, 'tracking') else opt.tracking) else cfg.get('CONFIDENCE', 0.05)
         self.num_classes = cfg.get('NUM_CLASSES', 80)
-        self.model = None
+        self.model = model
 
     def load_model(self):
         args = self.detector_opt

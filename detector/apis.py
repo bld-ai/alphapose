@@ -7,11 +7,11 @@
 from abc import ABC, abstractmethod
 
 
-def get_detector(opt=None):
+def get_detector(opt=None, model=None):
     if opt.detector == 'yolo':
         from detector.yolo_api import YOLODetector
         from detector.yolo_cfg import cfg
-        return YOLODetector(cfg, opt)
+        return YOLODetector(cfg, opt, model=model)
     elif opt.detector == 'tracker':
         from detector.tracker_api import Tracker
         from detector.tracker_cfg import cfg

@@ -11,7 +11,10 @@ import matplotlib.pyplot as plt
 try:
     from bbox import bbox_iou
 except ImportError:
-    from yolo.bbox import bbox_iou
+    try:
+        from yolo.bbox import bbox_iou
+    except ImportError:
+        from detector.yolo.bbox import bbox_iou
 
 
 def count_parameters(model):

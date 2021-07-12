@@ -24,10 +24,12 @@ EVAL_JOINTS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 class DataWriter():
     def __init__(self, cfg, opt, save_video=False,
                  video_save_opt=DEFAULT_VIDEO_SAVE_OPT,
-                 queueSize=1024):
+                 queueSize=1024,
+                 filename=""):
         self.cfg = cfg
         self.opt = opt
         self.video_save_opt = video_save_opt
+        self.filename = filename
 
         self.eval_joints = EVAL_JOINTS
         self.save_video = save_video
@@ -84,7 +86,7 @@ class DataWriter():
                 # if the thread indicator variable is set (img is None), stop the thread
                 if self.save_video:
                     stream.release()
-                write_json(final_result, self.opt.outputpath, form=self.opt.format, for_eval=self.opt.eval)
+                write_json(final_result, self.opt.outputpath, form=self.opt.format, for_eval=self.opt.eval, filename=self.filename)
                 print("Results have been written to json.")
                 return
             # image channel RGB->BGR
