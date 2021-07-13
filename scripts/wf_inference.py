@@ -195,7 +195,11 @@ if __name__ == "__main__":
         for videofile in vid_files:
             # load detection loader
             input_source = os.path.join(args.inputpath, videofile)
-            filename = os.path.splitext(os.path.basename(input_source))[0]
+            (filename, ext) = os.path.splitext(os.path.basename(input_source))
+            if ext != '.mp4':
+                if args.debug:
+                    print(f"File {input_source} is not a video in mp4 format. Skipping file.")
+                continue
             if args.debug:
                 print(f"Processing file " + videofile)
 
