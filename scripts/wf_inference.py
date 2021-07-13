@@ -125,16 +125,42 @@ if args.save_video:
     from alphapose.utils.writer import DEFAULT_VIDEO_SAVE_OPT as video_save_opt
 
 
-# def 
+def print_finish_info(runtime_profile=None):
+    if runtime_profile and runtime_profile['dt']:
+        det_time = np.sum(runtime_profile['dt'])
+        pose_time = np.sum(runtime_profile['pt'])
+        post_process_time = np.sum(runtime_profile['pn'])
+        load_time = runtime_profile['load_in'] + runtime_profile['load_det'] + runtime_profile['load_pose']
+        total_time = det_time + pose_time + post_process_time
+        print('===========================> Computing run times...')
+        print('load inputs: {li:.4f} | load yolo: {ld:.4f} | load pose: {lp:.4f} |=> load time: {lt:.4f}\ndet time: {dt:.4f} | pose time: {pt:.4f} | post processing: {pn:.4f} |=> run time: {tt:.2f}'.format(
+            li=runtime_profile['load_in'], ld=runtime_profile['load_det'], lp=runtime_profile['load_pose'], lt=load_time,
+            dt=det_time, pt=pose_time, pn=post_process_time, tt=total_time))
+    print('===========================> Finish Model Running.')
+    if (args.save_img or args.save_video) and not args.vis_fast:
+        print('===========================> Rendering remaining images in the queue...')
+        print('===========================> If this step takes too long, you can enable the --vis_fast flag to use fast rendering (real-time).')
 
 
 if __name__ == "__main__":
+    start_time = getTime()
+    runtime_profile = {
+        'load_in': 0,
+        'load_det': 0,
+        'load_pose': 0,
+        'dt': [],
+        'pt': [],
+        'pn': []
+    }
+
     # check if output path exists
     if not os.path.exists(args.outputpath):
         os.makedirs(args.outputpath)
 
+    ckpt, load_inputs = getTime(start_time)
+    runtime_profile['load_in'] = load_inputs
+
     # Get YOLO Model
-    start_time = getTime()
     print('Loading YOLO model..')
     yolo_model = Darknet(cfg.get('CONFIG', 'detector/yolo/cfg/yolov3-spp.cfg'))
     yolo_model.load_weights(cfg.get('WEIGHTS', 'detector/yolo/data/yolov3-spp.weights'))
@@ -144,7 +170,8 @@ if __name__ == "__main__":
     else:
         yolo_model.to(args.device)
     yolo_model.eval()
-    ckpt, load_yolo_time = getTime(start_time)
+    ckpt, load_yolo_time = getTime(ckpt)
+    runtime_profile['load_det'] = load_yolo_time
     print(f"Loading YOLO model finished in {load_yolo_time} seconds.")
 
     # Load Pose Model (Loading pose model)
@@ -158,15 +185,8 @@ if __name__ == "__main__":
         pose_model.to(args.device)
     pose_model.eval()
     _, load_pose_time = getTime(ckpt)
+    runtime_profile['load_pose'] = load_pose_time
     print(f"Loading YOLO model finished in {load_pose_time} seconds.")
-
-
-    runtime_profile = {
-        'dt': [],
-        'pt': [],
-        'pn': []
-    }
-
 
     if args.mode == "video" and len(args.inputpath):
         # search for mp4 videos, add video filepaths with .mp4 extensions to list
@@ -271,3 +291,5 @@ if __name__ == "__main__":
     else:
         # normal processing of images
         pass
+
+    print_finish_info(runtime_profile)
