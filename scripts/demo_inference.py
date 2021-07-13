@@ -149,8 +149,11 @@ def print_finish_info(runtime_profile=None):
         det_time = np.sum(runtime_profile['dt'])
         pose_time = np.sum(runtime_profile['pt'])
         post_process_time = np.sum(runtime_profile['pn'])
+        load_time = runtime_profile['load_in'] + runtime_profile['load_det'] + runtime_profile['load_pose']
         total_time = det_time + pose_time + post_process_time
-        print('det time: {dt:.4f} | pose time: {pt:.4f} | post processing: {pn:.4f} |=> total: {tt:.2f}'.format(
+        print('===========================> Computing run times...')
+        print('load inputs: {li:.4f} | load yolo: {ld:.4f} | load pose: {lp:.4f} |=> load time: {lt:.4f}\ndet time: {dt:.4f} | pose time: {pt:.4f} | post processing: {pn:.4f} |=> run time: {tt:.2f}'.format(
+            li=runtime_profile['load_in'], ld=runtime_profile['load_det'], lp=runtime_profile['load_pose'], lt=load_time,
             dt=det_time, pt=pose_time, pn=post_process_time, tt=total_time))
     print('===========================> Finish Model Running.')
     if (args.save_img or args.save_video) and not args.vis_fast:
@@ -166,10 +169,23 @@ def loop():
 
 
 if __name__ == "__main__":
+    start_time = getTime()
+    runtime_profile = {
+        'load_in': 0,
+        'load_det': 0,
+        'load_pose': 0,
+        'dt': [],
+        'pt': [],
+        'pn': []
+    }
+
     mode, input_source = check_input()
 
     if not os.path.exists(args.outputpath):
         os.makedirs(args.outputpath)
+
+    ckpt_time, load_inputs = getTime(start_time)
+    runtime_profile['load_in'] = load_inputs
 
     # Load detection loader
     if mode == 'webcam':
@@ -181,6 +197,9 @@ if __name__ == "__main__":
     else:
         det_loader = DetectionLoader(input_source, get_detector(args), cfg, args, batchSize=args.detbatch, mode=mode, queueSize=args.qsize)
         det_worker = det_loader.start()
+
+    ckpt_time, load_det = getTime(ckpt_time)
+    runtime_profile['load_det'] = load_det
 
     # Load pose model
     pose_model = builder.build_sppe(cfg.MODEL, preset_cfg=cfg.DATA_PRESET)
@@ -196,11 +215,8 @@ if __name__ == "__main__":
         pose_model.to(args.device)
     pose_model.eval()
 
-    runtime_profile = {
-        'dt': [],
-        'pt': [],
-        'pn': []
-    }
+    ckpt_time, pose_time = getTime(ckpt_time)
+    runtime_profile['load_pose'] = pose_time
 
     # Init data writer
     queueSize = 2 if mode == 'webcam' else args.qsize
