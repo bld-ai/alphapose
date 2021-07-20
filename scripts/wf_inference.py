@@ -142,6 +142,13 @@ def print_finish_info(runtime_profile=None):
         print('===========================> If this step takes too long, you can enable the --vis_fast flag to use fast rendering (real-time).')
 
 
+def print_d(*args, debug=None, **kwargs):
+    if debug is None:
+        debug = args.debug
+    if debug:
+        print(*args, **kwargs)
+
+
 if __name__ == "__main__":
     start_time = getTime()
     runtime_profile = {
@@ -201,7 +208,7 @@ if __name__ == "__main__":
                     print(f"File {input_source} is not a video in mp4 format. Skipping file.")
                 continue
             if args.debug:
-                print(f"Processing file " + videofile)
+                print(f"Processing file {videofile}...")
 
 
             queueSize = args.qsize
@@ -216,27 +223,34 @@ if __name__ == "__main__":
                 writer = DataWriter(cfg, args, save_video=True, video_save_opt=video_save_opt, queueSize=queueSize, filename=filename).start()
             else:
                 writer = DataWriter(cfg, args, save_video=False, queueSize=queueSize, filename=filename).start()
+            print_d(f"Loaded DataWriter {writer}")
 
             det_loader = DetectionLoader(input_source, get_detector(args, model=yolo_model), cfg, args, batchSize=args.detbatch, mode=args.mode, queueSize=args.qsize)
             det_worker = det_loader.start()
             data_len = det_loader.length
+            print_d(f"Loaded DetectionLoader {det_loader}")
 
             im_names_desc = tqdm(range(data_len), dynamic_ncols=True)
             
             try:
                 for i in im_names_desc:
+                    print_d(f"Processing range {i}...")
                     start_time = getTime()
                     with torch.no_grad():
                         (inps, orig_img, im_name, boxes, scores, ids, cropped_boxes) = det_loader.read()
+                        print_d("Read values from detector")
                         if orig_img is None:
+                            print_d("orig_img is None")
                             break
                         if boxes is None or boxes.nelement() == 0:
                             writer.save(None, None, None, None, None, orig_img, im_name)
+                            print_d("boxes is None or boxes.nelement() == 0")
                             continue
                         if args.profile:
                             ckpt_time, det_time = getTime(start_time)
                             runtime_profile['dt'].append(det_time)
                         # Pose Estimation
+                        print_d("Starting pose estimation...")
                         inps = inps.to(args.device)
                         datalen = inps.size(0)
                         leftover = 0
@@ -259,6 +273,7 @@ if __name__ == "__main__":
                             runtime_profile['pt'].append(pose_time)
                         hm = hm.cpu()
                         writer.save(boxes, scores, ids, hm, cropped_boxes, orig_img, im_name)
+                        print_d("Finished pose estimation")
                         if args.profile:
                             ckpt_time, post_time = getTime(ckpt_time)
                             runtime_profile['pn'].append(post_time)
