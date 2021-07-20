@@ -24,7 +24,7 @@ script_processor = ScriptProcessor(
     )
 
 script_processor.run(
-    code='s3://sagemaker-us-east-2-204031725010/wf_inference.py',
+    code='scripts/wf_inference.py',
     inputs=[ProcessingInput(
         source=args.s3_input,
         destination='/opt/ml/processing/input'

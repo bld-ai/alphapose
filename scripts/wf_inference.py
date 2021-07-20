@@ -142,11 +142,9 @@ def print_finish_info(runtime_profile=None):
         print('===========================> If this step takes too long, you can enable the --vis_fast flag to use fast rendering (real-time).')
 
 
-def print_d(*args, debug=None, **kwargs):
-    if debug is None:
-        debug = args.debug
-    if debug:
-        print(*args, **kwargs)
+def print_d(*print_args, debug=None, **print_kwargs):
+    if debug or args.debug:
+        print(*print_args, **print_kwargs)
 
 
 if __name__ == "__main__":
@@ -199,6 +197,7 @@ if __name__ == "__main__":
         # search for mp4 videos, add video filepaths with .mp4 extensions to list
         for _, _, vid_files in os.walk(args.inputpath):
             break
+        print(f"Found these videos {vid_files}")
         for videofile in vid_files:
             # load detection loader
             input_source = os.path.join(args.inputpath, videofile)
@@ -217,6 +216,8 @@ if __name__ == "__main__":
                 batchSize = int(batchSize / 2)
 
             # Init data writer
+            print("Loading data writer...")
+            print_d("Loading data writer......")
             if args.save_video:
                 video_save_opt['savepath'] = os.path.join(args.outputpath, 'AlphaPose_' + videofile)
                 video_save_opt.update(det_loader.videoinfo)
@@ -225,6 +226,7 @@ if __name__ == "__main__":
                 writer = DataWriter(cfg, args, save_video=False, queueSize=queueSize, filename=filename).start()
             print_d(f"Loaded DataWriter {writer}")
 
+            print_d(f"Loading input_source {input_source}")
             det_loader = DetectionLoader(input_source, get_detector(args, model=yolo_model), cfg, args, batchSize=args.detbatch, mode=args.mode, queueSize=args.qsize)
             det_worker = det_loader.start()
             data_len = det_loader.length
