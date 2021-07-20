@@ -7,8 +7,7 @@ RUN apt update && \
 
 WORKDIR /workspace/alphapose
 
-RUN conda create -n alphapose python=3.6 pip -y && \
-    mkdir detector/yolo/data/
+RUN mkdir detector/yolo/data/
 
 ENV CUDA_HOME=/usr/local/cuda
 ENV PATH=/usr/local/cuda/bin/:$PATH
@@ -16,15 +15,14 @@ ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
 COPY detector/yolo/data/* detector/yolo/data/
 COPY pretrained_models/*.pth pretrained_models/
-COPY setup.sh entrypoint.sh /
+COPY setup.sh /
+
+RUN conda install torchvision==0.3.0 matplotlib"<3.4" -c pytorch -y && \
+    pip install scikit-build cmake cython
 
 RUN chmod +x "/setup.sh" && \
-    chmod +x "/entrypoint.sh" && \
-    echo "conda activate alphapose" >> ~/.bashrc
+    "/setup.sh" && \
+    mkdir -p /opt/ml/processing/input/ && \
+    mkdir -p /opt/ml/processing/output/
 
-SHELL ["conda", "run", "--no-capture-output", "-n", "alphapose", "/bin/bash", "-c"]
-RUN conda install pytorch==1.1.0 torchvision==0.3.0 cudatoolkit=10.0 matplotlib"<3.4" -c pytorch -y && \
-    pip install cython && \
-    "/setup.sh"
-
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash"]
