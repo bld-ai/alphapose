@@ -20,6 +20,7 @@ class DetectionLoader():
         print(f"  > cfg = {cfg}")
         print(f"  > opt = {opt}")
         print(f"  > mode = {mode}")
+        print(f"  > accessing input_source...")
         can_access = os.access(Path(input_source), os.R_OK)
         print(f"  > access - {can_access}")
         self.cfg = cfg
