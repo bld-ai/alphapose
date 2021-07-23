@@ -21,7 +21,6 @@ script_processor = ScriptProcessor(
     role=args.arn_role,
     instance_count=1,
     instance_type='ml.p3.2xlarge',
-    max_runtime_in_seconds=5*60,
 )
 
 script_processor.run(

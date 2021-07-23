@@ -156,12 +156,12 @@ def print_d(*print_args, debug=None, **print_kwargs):
 
 
 if __name__ == "__main__":
-    print_p(f"Checking input arguments...")
-    print_p(f"pwd: {Path('.').resolve()}")
-    print_p(f"cfg: {args.cfg} - {Path(args.cfg).is_file()}")
-    print_p(f"checkpoint: {args.checkpoint} - {Path(args.checkpoint).is_file()}")
-    print_p(f"indir: {args.inputpath} - {Path(args.inputpath).is_dir()}")
-    print_p(f"outdir: {args.outputpath} - {Path(args.outputpath).is_dir()}")
+    print_d(f"Checking input arguments...")
+    print_d(f"pwd: {Path('.').resolve()}")
+    print_d(f"cfg: {args.cfg} - {Path(args.cfg).is_file()}")
+    print_d(f"checkpoint: {args.checkpoint} - {Path(args.checkpoint).is_file()}")
+    print_d(f"indir: {args.inputpath} - {Path(args.inputpath).is_dir()}")
+    print_d(f"outdir: {args.outputpath} - {Path(args.outputpath).is_dir()}")
 
     start_time = getTime()
     runtime_profile = {
@@ -181,7 +181,7 @@ if __name__ == "__main__":
     runtime_profile['load_in'] = load_inputs
 
     # Get YOLO Model
-    print_p('Loading YOLO model...')
+    print_d('Loading YOLO model...')
     yolo_model = Darknet(cfg.get('CONFIG', 'detector/yolo/cfg/yolov3-spp.cfg'))
     yolo_model.load_weights(cfg.get('WEIGHTS', 'detector/yolo/data/yolov3-spp.weights'))
     yolo_model.net_info['height'] = cfg.get('INP_DIM', 608)
@@ -192,11 +192,11 @@ if __name__ == "__main__":
     yolo_model.eval()
     ckpt, load_yolo_time = getTime(ckpt)
     runtime_profile['load_det'] = load_yolo_time
-    print_p(f"  => loaded YOLO model in {load_yolo_time} seconds.")
+    print_d(f"  => loaded YOLO model in {load_yolo_time} seconds.")
 
     # Load Pose Model (Loading pose model)
     pose_model = builder.build_sppe(cfg.MODEL, preset_cfg=cfg.DATA_PRESET)
-    print_p('Loading pose model from %s...' % (args.checkpoint,))
+    print_d('Loading pose model from %s...' % (args.checkpoint,))
     pose_model.load_state_dict(torch.load(args.checkpoint, map_location=args.device))
     pose_dataset = builder.retrieve_dataset(cfg.DATASET.TRAIN)
     if len(args.gpus) > 1:
@@ -206,13 +206,13 @@ if __name__ == "__main__":
     pose_model.eval()
     _, load_pose_time = getTime(ckpt)
     runtime_profile['load_pose'] = load_pose_time
-    print_p(f"  => loaded pose model in {load_pose_time} seconds.")
+    print_d(f"  => loaded pose model in {load_pose_time} seconds.")
 
     if args.mode == "video" and len(args.inputpath):
         # search for mp4 videos, add video filepaths with .mp4 extensions to list
         for _, _, vid_files in os.walk(args.inputpath):
             break
-        print_p(f"Found these videos {vid_files}")
+        print_d(f"Found these videos {vid_files}")
         for videofile in vid_files:
             # load detection loader
             input_source = os.path.join(args.inputpath, videofile)
@@ -228,23 +228,23 @@ if __name__ == "__main__":
                 batchSize = int(batchSize / 2)
 
             # Init data writer
-            print_p("Loading data writer...")
+            print_d("Loading data writer...")
             if args.save_video:
                 video_save_opt['savepath'] = os.path.join(args.outputpath, 'AlphaPose_' + videofile)
                 video_save_opt.update(det_loader.videoinfo)
                 writer = DataWriter(cfg, args, save_video=True, video_save_opt=video_save_opt, queueSize=queueSize, filename=filename).start()
             else:
                 writer = DataWriter(cfg, args, save_video=False, queueSize=queueSize, filename=filename).start()
-            print_p(f"  => loaded DataWriter {writer}")
+            print_d(f"  => loaded DataWriter {writer}")
 
-            print_p(f"Loading DetectionLoader...")
-            print_p(f"  > input_source = {input_source}")
+            print_d(f"Loading DetectionLoader...")
+            print_d(f"  > input_source = {input_source}")
             detector = get_detector(args, model=yolo_model)
-            print_p(f"  > get_detector(args, model=yolo_model) = {detector}")
+            print_d(f"  > get_detector(args, model=yolo_model) = {detector}")
             det_loader = DetectionLoader(input_source, get_detector(args, model=yolo_model), cfg, args, batchSize=args.detbatch, mode=args.mode, queueSize=args.qsize)
             det_worker = det_loader.start()
             data_len = det_loader.length
-            print_p(f"  => loaded DetectionLoader {det_loader}")
+            print_d(f"  => loaded DetectionLoader {det_loader}")
 
             im_names_desc = tqdm(range(data_len), dynamic_ncols=True)
             
