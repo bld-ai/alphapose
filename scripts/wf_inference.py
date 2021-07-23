@@ -156,9 +156,6 @@ def print_d(*print_args, debug=None, **print_kwargs):
 
 
 if __name__ == "__main__":
-    # pull repo changes so we don't rebuild docker container to debug library files
-    subprocess.call(["git", "pull"])
-
     print_p(f"Checking input arguments...")
     print_p(f"pwd: {Path('.').resolve()}")
     print_p(f"cfg: {args.cfg} - {Path(args.cfg).is_file()}")
