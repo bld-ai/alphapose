@@ -21,9 +21,10 @@ RUN conda install python=3.6 pip pytorch==1.1.0 torchvision==0.3.0 cudatoolkit=1
 RUN chmod +x "setup.sh" && "./setup.sh"
 
 # include weights, models, and sample data
-RUN mkdir detector/yolo/data/ examples/vid/ examples/res/
+RUN mkdir -p detector/yolo/data/ examples/vid/ examples/res/ /root/.cache/torch/checkpoints/
 COPY detector/yolo/data/* detector/yolo/data/
 COPY pretrained_models/*.pth pretrained_models/
 COPY examples/vid/*.mp4 examples/vid/
+COPY resnet_pretrained_models/*.pth /root/.cache/torch/checkpoints/
 
 ENTRYPOINT ["/bin/bash"]
