@@ -2,7 +2,6 @@ import os
 import sys
 from threading import Thread
 from queue import Queue
-from pathlib import Path
 
 import cv2
 import numpy as np
@@ -15,14 +14,6 @@ from alphapose.models import builder
 
 class DetectionLoader():
     def __init__(self, input_source, detector, cfg, opt, mode='image', batchSize=1, queueSize=128):
-        print(f"  > input_source = {input_source}")
-        print(f"  > detector = {detector}")
-        print(f"  > cfg = {cfg}")
-        print(f"  > opt = {opt}")
-        print(f"  > mode = {mode}")
-        print(f"  > accessing input_source...")
-        can_access = os.access(Path(input_source), os.R_OK)
-        print(f"  > access - {can_access}")
         self.cfg = cfg
         self.opt = opt
         self.mode = mode
@@ -33,9 +24,7 @@ class DetectionLoader():
             self.imglist = [os.path.join(self.img_dir, im_name.rstrip('\n').rstrip('\r')) for im_name in input_source]
             self.datalen = len(input_source)
         elif mode == 'video':
-            print(f"Loading video...")
             stream = cv2.VideoCapture(input_source)
-            print(f"  > opened {stream.isOpened()}")
             assert stream.isOpened(), 'Cannot capture source'
             self.path = input_source
             self.datalen = int(stream.get(cv2.CAP_PROP_FRAME_COUNT))

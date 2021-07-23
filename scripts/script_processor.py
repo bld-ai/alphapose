@@ -3,11 +3,11 @@ import argparse
 
 parser = argparse.ArgumentParser(description='SageMaker Script Processor')
 parser.add_argument('--image_uri', dest='image_uri',
-                    help='URI of docker image', default='204031725010.dkr.ecr.us-east-2.amazonaws.com/bld-alphapose:v5')
+                    help='URI of docker image', default='204031725010.dkr.ecr.us-east-2.amazonaws.com/bld-alphapose:v7')
 parser.add_argument('--arn_role', dest='arn_role',
                     help='ARN role', default='arn:aws:iam::204031725010:role/wf-sagemaker-pose-pipeline')
 parser.add_argument('--s3_input', dest='s3_input',
-                    help='path to input in s3', default="s3://wf-sagemaker-us-east-2/inputvids/video-10-fps-1.mp4")
+                    help='path to input in s3', default="s3://wf-sagemaker-us-east-2/inputvids/")
 parser.add_argument('--s3_output', dest='s3_output',
                     help='path to output in s3', default="s3://wf-sagemaker-us-east-2/outputvids/")
 parser.add_argument('--detbatch', dest='detbatch',
