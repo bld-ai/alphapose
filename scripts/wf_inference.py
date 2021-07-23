@@ -2,6 +2,7 @@
 import argparse
 import os
 import platform
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -155,6 +156,16 @@ def print_d(*print_args, debug=None, **print_kwargs):
 
 
 if __name__ == "__main__":
+    # pull repo changes so we don't rebuild docker container to debug library files
+    subprocess.call(["git", "pull"])
+
+    print_p(f"Checking input arguments...")
+    print_p(f"pwd: {Path('.').resolve()}")
+    print_p(f"cfg: {args.cfg} - {Path(args.cfg).is_file()}")
+    print_p(f"checkpoint: {args.checkpoint} - {Path(args.checkpoint).is_file()}")
+    print_p(f"indir: {args.inputpath} - {Path(args.inputpath).is_dir()}")
+    print_p(f"outdir: {args.outputpath} - {Path(args.outputpath).is_dir()}")
+
     start_time = getTime()
     runtime_profile = {
         'load_in': 0,

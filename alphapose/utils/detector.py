@@ -2,6 +2,7 @@ import os
 import sys
 from threading import Thread
 from queue import Queue
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -29,7 +30,11 @@ class DetectionLoader():
             self.imglist = [os.path.join(self.img_dir, im_name.rstrip('\n').rstrip('\r')) for im_name in input_source]
             self.datalen = len(input_source)
         elif mode == 'video':
+            print(f"Loading video...")
+            can_access = os.access(Path(input_source))
+            print(f"  > access - {can_access}")
             stream = cv2.VideoCapture(input_source)
+            print(f"  > opened {stream.isOpened()}")
             assert stream.isOpened(), 'Cannot capture source'
             self.path = input_source
             self.datalen = int(stream.get(cv2.CAP_PROP_FRAME_COUNT))
