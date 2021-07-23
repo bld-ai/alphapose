@@ -20,6 +20,8 @@ class DetectionLoader():
         print(f"  > cfg = {cfg}")
         print(f"  > opt = {opt}")
         print(f"  > mode = {mode}")
+        can_access = os.access(Path(input_source))
+        print(f"  > access - {can_access}")
         self.cfg = cfg
         self.opt = opt
         self.mode = mode
@@ -31,8 +33,6 @@ class DetectionLoader():
             self.datalen = len(input_source)
         elif mode == 'video':
             print(f"Loading video...")
-            can_access = os.access(Path(input_source))
-            print(f"  > access - {can_access}")
             stream = cv2.VideoCapture(input_source)
             print(f"  > opened {stream.isOpened()}")
             assert stream.isOpened(), 'Cannot capture source'
