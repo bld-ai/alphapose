@@ -18,7 +18,7 @@ ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 RUN conda install python=3.6 pip pytorch==1.1.0 torchvision==0.3.0 cudatoolkit=10.0 matplotlib"<3.4" -c pytorch -y && \
     pip install cython
 
-RUN chmod +x "setup.sh" && "./setup.sh"
+RUN chmod +x "sagemaker/setup.sh" && "./sagemaker/setup.sh"
 
 # include weights, models, and sample data
 RUN mkdir -p detector/yolo/data/ examples/vid/ examples/res/ /root/.cache/torch/checkpoints/
